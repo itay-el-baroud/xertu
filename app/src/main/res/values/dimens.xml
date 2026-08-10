@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="card_corner">12dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+</resources>
