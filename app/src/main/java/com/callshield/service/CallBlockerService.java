@@ -2,52 +2,24 @@ package com.callshield.service;
 
 import android.telecom.Call;
 import android.telecom.CallScreeningService;
-import com.callshield.data.AppDatabase;
-import com.callshield.data.BlockedNumber;
-import com.callshield.data.CallLogEntry;
-import com.callshield.util.NotificationHelper;
+import androidx.annotation.NonNull;
+import com.callshield.utils.NotificationHelper;
 
 public class CallBlockerService extends CallScreeningService {
+
     @Override
-    public void onScreenCall(Call.Details details) {
-        String phone = null;
-        if (details.getHandle()!= null) {
-            phone = details.getHandle().getSchemeSpecificPart();
-        }
-        if (phone == null) {
-            respondToCall(details, new CallResponse.Builder().build());
-            return;
-        }
+    public void onScreenCall(@NonNull Call.Details details) {
+        try {
+            NotificationHelper.createChannel(this);
+        } catch (Exception e) {}
 
-        AppDatabase db = AppDatabase.getInstance(this);
-        BlockedNumber blocked = db.blockedDao().findByNumber(phone);
-
-        boolean shouldBlock = false;
-        if (blocked!= null) {
-            if (blocked.expiresAt!= null && blocked.expiresAt < System.currentTimeMillis()) {
-                db.blockedDao().delete(blocked);
-            } else {
-                shouldBlock = true;
-                blocked.attemptsCount++;
-                blocked.lastAttemptTime = System.currentTimeMillis();
-                db.blockedDao().update(blocked);
-            }
-        }
-
-        db.logDao().insert(new CallLogEntry(phone, "call"));
-
-        if (shouldBlock) {
-            CallResponse response = new CallResponse.Builder()
-                   .setDisallowCall(true)
-                   .setRejectCall(true)
-                   .setSkipCallLog(false)
-                   .setSkipNotification(false)
-                   .build();
-            respondToCall(details, response);
-            int count = blocked!= null? blocked.attemptsCount : 1;
-            NotificationHelper.showBlockedNotification(this, phone, count);
-        } else {
-            respondToCall(details, new CallResponse.Builder().build());
+        try {
+            CallResponse.Builder builder = new CallResponse.Builder();
+            respondToCall(details, builder.build());
+        } catch (Exception e) {
+            try {
+                respondToCall(details, new CallResponse.Builder().build());
+            } catch (Exception ex) {}
         }
     }
 }
