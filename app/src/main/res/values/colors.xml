@@ -1,0 +1,9 @@
+<resources>
+    <color name="primary">#0D47A1</color>
+    <color name="primary_variant">#002171</color>
+    <color name="secondary">#1976D2</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#121212</color>
+    <color name="card_light">#F5F5F5</color>
+    <color name="card_dark">#1E1E1E</color>
+</resources>
